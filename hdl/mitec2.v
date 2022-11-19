@@ -47,7 +47,6 @@ module mitec2(
     output RAMA7
     );
 
-// fully confident in these equations, they work to boot mostly everything
 assign NMI = NMIN;
 
 assign MEMR = !(!RD && WR && !MREQ && IORQ && RFSH);
@@ -64,16 +63,12 @@ assign CE89 = !(RD && !WR && MREQ && !A7);
 assign CSSRAM = !(A14 && A15);
 assign CEROM2 = !(A14 && A15);
 
-// these signals I haven't found a perfect solution for
-// the below equations are guesses, but don't seem to work
-// however, they only seem to affect cartridges that contain
-// onboard dram, so the impact is minimal
-assign CAS1 = !(RFSH && !A14 && A15);
-assign CAS2 = !(RFSH && A14 && A15);
-assign RAS1 = !(!MREQ && !RFSH);
-assign RAS2 = !(!MREQ && !RFSH) && !(!A6 && !MREQ);
-assign MUX = !(!RD || A15 || A7);
-assign RAMA7 = A7 || !RD || !RFSH;
+assign #10 RAS1 = !((!MREQ && !RFSH) || (!MREQ && (!RD || !WR) && !A14 && A15));
+assign #10 RAS2 = !((!MREQ && !RFSH) || (!MREQ && (!RD || !WR) && A14 && A15));
+assign #50 MUX = !(RFSH && ((!MREQ && !RD) || (!MREQ && !WR)));
+assign #50 CAS1 = !(!MUX && !RAS1);
+assign #50 CAS2 = !(!MUX && !RAS2);
+assign #30 RAMA7 = A7 && RFSH;
 
 
 endmodule

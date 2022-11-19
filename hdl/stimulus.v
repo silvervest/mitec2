@@ -31,16 +31,15 @@ module mitec2_test;
 	reg MREQ;
 	reg IORQ;
 	reg RFSH;
-	reg RAMA7;
 	reg A6;
 	reg A7;
 	reg A14;
 	reg A15;
 
 	// Outputs
-	wire reg NMI;
-	wire reg IOR;
-	wire reg IOW;
+	wire NMI;
+	wire IOR;
+	wire IOW;
 	wire MEMR;
 	wire MEMW;
 	wire CSR;
@@ -48,11 +47,12 @@ module mitec2_test;
 	wire CE89;
 	wire CSSRAM;
 	wire CEROM2;
-	wire reg CAS1;
+	wire CAS1;
 	wire RAS1;
 	wire CAS2;
 	wire RAS2;
 	wire MUX;
+	wire RAMA7;
 
 	// Instantiate the Unit Under Test (UUT)
 	mitec2 uut (
@@ -85,6 +85,8 @@ module mitec2_test;
 	);
 
 	initial begin
+		$monitor("T=%0t: MREQ=%d, RD=%d, WR=%d, RFSH=%d, MUX=%d\n", $time, MREQ, RD, WR, RFSH, MUX	);
+
 		// Initialize Inputs
 		NMIN = 1;
 		RD = 1;
@@ -92,25 +94,25 @@ module mitec2_test;
 		MREQ = 1;
 		IORQ = 1;
 		RFSH = 1;
-		RAMA7 = 1;
-		A6 = 1;
-		A7 = 1;
-		A14 = 1;
-		A15 = 1;
+		A6 = 0;
+		A7 = 0;
+		A14 = 0;
+		A15 = 0;
 
 		// Wait 100 ns for global reset to finish
 		#100;
         
-		// Add stimulus here
-		#50 RD = 0;
-		#50 MREQ = 0;
-		#100 RD = 1;
-		#50 MREQ = 0;
+//assign #50 MUX = !(!RFSH || (!MREQ && !RD) || (!MREQ && !WR));
 
-	end
+		#10 RFSH = 0;
+		#60 RFSH = 1;
+		#100 MREQ = 0;
+		#10 RD = 0;
+		#400 MREQ = 1; RD = 1;
+		#100 MREQ = 0;
+		#10 WR = 0;
+		#400 MREQ = 1; WR = 1;
 	
-	initial begin
-		$monitor("MREQ=%d, RAS1=%d, CAS1=%d\n", MREQ, RAS1, CAS1	);
 	end
       
 endmodule
