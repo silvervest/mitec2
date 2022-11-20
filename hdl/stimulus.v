@@ -85,7 +85,7 @@ module mitec2_test;
 	);
 
 	initial begin
-		$monitor("T=%0t: MREQ=%d, RD=%d, WR=%d, RFSH=%d, MUX=%d\n", $time, MREQ, RD, WR, RFSH, MUX	);
+		$monitor("T=%0t: NMI=%d, NMIN=%d\n", $time, NMI, NMIN	);
 
 		// Initialize Inputs
 		NMIN = 1;
@@ -102,17 +102,12 @@ module mitec2_test;
 		// Wait 100 ns for global reset to finish
 		#100;
         
-//assign #50 MUX = !(!RFSH || (!MREQ && !RD) || (!MREQ && !WR));
 
-		#10 RFSH = 0;
-		#60 RFSH = 1;
-		#100 MREQ = 0;
-		#10 RD = 0;
-		#400 MREQ = 1; RD = 1;
-		#100 MREQ = 0;
-		#10 WR = 0;
-		#400 MREQ = 1; WR = 1;
-	
+		NMIN = 1;
+		#10000000 NMIN = 0;
+		#60000000 NMIN = 1;
+		#60000000 NMIN = 0;
+
 	end
       
 endmodule
