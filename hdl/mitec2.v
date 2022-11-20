@@ -47,8 +47,8 @@ module mitec2(
     output RAMA7
     );
 
-	// this still needs to be debounced
-	assign NMI = NMIN;
+	// NMI is just debounced NMIN - using RD as a "clock" signal (thanks kamillebidan)
+	debounce db(RD, NMIN, NMI);
 
 	// store common states in temporary wires for cleanliness
 	wire in_rd = !RD && WR,
