@@ -59,23 +59,27 @@ module mitec2(
 	assign MEMR = !(in_rd && !MREQ);
 	assign MEMW = !(in_wr && !MREQ);
 
+	// the following interface ICs are enabled when MREQ is HIGH, with different combinations of A6, A7 and IORQ
+	// the I/O map detailing these /CS pins is on page 10 of the service manual: 2-9 I/O MAP
+	// the PPI is activated when IORQ is LOW
+	// the VDP is activated when A6 is LOW
+	// the PSG is activated when A7 is LOW
+
 	// /IOR and /IOW are used to enable read/write of the PPI
-	// they are LOW when /MREQ is HIGH and /IORQ is LOW
-	assign IOR = !(in_rd && MREQ && !IORQ);
-	assign IOW = !(in_wr && MREQ && !IORQ);
+	wire ppi_active = MREQ && !IORQ && A6 && A7;
+	assign IOR = !(in_rd && ppi_active);
+	assign IOW = !(in_wr && ppi_active);
 
 	// /CSR and /CSW are used to enable read/write of the VDP
-	// they are LOW when /MREQ is HIGH, /RFSH is HIGH and A6 is LOW
-	// /RFSH isn't obvious, and was shown as required during logic analysis and testing
-	// A6 is shown as /CS for the VDP on page 10 of service manual: 2-9 I/O MAP
-	assign CSR = !(in_rd && MREQ && RFSH && !A6);
-	assign CSW = !(in_wr && MREQ && RFSH && !A6);
+	// RFSH isn't obvious, and was shown as required during logic analysis and testing
+	// apparently the VDP does not update during a memory refresh cycle
+	wire vdp_active = MREQ && RFSH && !A6 && A7;
+	assign CSR = !(in_rd && vdp_active);
+	assign CSW = !(in_wr && vdp_active);
 
 	// /CE89 is used to control the PSG
-	// it is LOW when /MREQ is HIGH, /IORQ is HIGH and A7 is LOW
-	// this equation overlaps /IOW but it doesn't seem to matter (yet)
-	// A7 is shown as /CS for the PSG on page 10 of service manual: 2-9 I/O MAP
-	assign CE89 = !(in_wr && MREQ && !IORQ && !A7);
+	wire psg_active = MREQ && !IORQ && A6 && !A7;
+	assign CE89 = !(in_wr && psg_active);
 
 	// /CSSRAM is weakly used to activate the onboard SRAM (carts disable this by strongly pulling HIGH)
 	// /CEROM2 is used to activate the cart ROM
